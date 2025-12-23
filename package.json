@@ -13,6 +13,9 @@
     "electron:build": "vite build && electron-builder"
   },
   "dependencies": {
+    "-": "^0.0.1",
+    "g": "^2.0.1",
+    "npm": "^11.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
