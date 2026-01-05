@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('electron', {
     maximize: () => ipcRenderer.invoke('window-maximize'),
     unmaximize: () => ipcRenderer.invoke('window-unmaximize'),
     isMaximized: () => ipcRenderer.invoke('window-is-maximized'),
+    minimize: () => ipcRenderer.invoke('window-minimize'),
+    openSettings: () => ipcRenderer.invoke('open-settings'),
     close: () => ipcRenderer.invoke('app-close'),
     onMaximized: (callback) => ipcRenderer.on('window-maximized', callback),
     onUnmaximized: (callback) => ipcRenderer.on('window-unmaximized', callback),

@@ -19,6 +19,36 @@
   /* For absolute positioning of handles */
 }
 
+/* Scrollable Container for Body (Title + Editor) */
+.note-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+.note-body-title {
+  padding: 30px 15px 10px 15px;
+  font-size: 24px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 0 15px;
+  /* Aligns with editor padding if needed */
+  user-select: none;
+  user-select: text;
+  cursor: default;
+  font-family: inherit;
+}
+
+/* Iterate: User asked for "identifier", maybe they want to copy it? let's allow copy but not edit. user-select: text */
+user-select: text;
+cursor: default;
+font-family: inherit;
+}
+
 /* Custom Resize Handles */
 .resize-handle {
   position: absolute;
@@ -242,80 +272,101 @@
   color: white;
 }
 
-/* Full Screen Settings 2.0 */
-.settings-panel.full-cover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 15, 15, 0.98);
-  z-index: 200;
+/* Settings Modal - Sidebar Layout */
+/* Settings Panel - Integrated Layout */
+.settings-panel {
+  flex: 1;
+  /* Fills remaining space */
   display: flex;
   flex-direction: row;
-  /* Sidebar Layout */
-  gap: 0;
+  overflow: hidden;
+  background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(20px);
-  -webkit-app-region: no-drag;
+  animation: fadeIn 0.1s ease-out;
 }
 
-/* Sidebar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sidebar - Drag Handle for App Window */
 .settings-sidebar {
-  width: 200px;
+  width: 250px;
   background: rgba(255, 255, 255, 0.03);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  padding: 20px 10px;
-  gap: 5px;
+  padding: 20px;
+  -webkit-app-region: drag;
+  /* Allows moving the window */
+  user-select: none;
 }
 
-.settings-sidebar h2 {
-  font-size: 18px;
+.settings-sidebar:active {
+  cursor: default;
+}
+
+.sidebar-header h2 {
+  margin: 0 0 30px 0;
+  font-size: 20px;
+  font-weight: 500;
   color: white;
-  margin: 0 0 20px 10px;
   opacity: 0.9;
 }
 
-.settings-nav-btn {
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 10px 15px;
-  color: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s;
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.settings-nav-btn:hover {
+.sidebar-btn {
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 400;
+  -webkit-app-region: no-drag;
+}
+
+.sidebar-btn:hover {
   background: rgba(255, 255, 255, 0.05);
   color: white;
 }
 
-.settings-nav-btn.active {
+.sidebar-btn.active {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   font-weight: 500;
 }
 
-.spacer {
-  flex: 1;
-}
-
-.close-settings-btn-sidebar {
+.sidebar-close-btn {
+  margin-top: auto;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  text-align: center;
+  font-size: 13px;
+  -webkit-app-region: no-drag;
 }
 
-.close-settings-btn-sidebar:hover {
-  background: rgba(255, 0, 0, 0.1);
+.sidebar-close-btn:hover {
+  background: rgba(255, 0, 0, 0.15);
   border-color: rgba(255, 50, 50, 0.3);
   color: #ffcccc;
 }
@@ -323,27 +374,48 @@
 /* Content Area */
 .settings-content {
   flex: 1;
-  padding: 40px;
+  padding: 30px 40px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  position: relative;
+}
+
+/* Optional top-right close */
+.content-header-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+}
+
+.icon-close-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.icon-close-btn:hover {
+  color: white;
 }
 
 .setting-section h3 {
-  margin: 0 0 15px 0;
-  font-size: 20px;
+  margin: 0 0 20px 0;
+  font-size: 22px;
   font-weight: 400;
   color: white;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .setting-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -352,7 +424,7 @@
   display: flex;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 6px;
-  padding: 2px;
+  padding: 3px;
 }
 
 .choice-btn {
@@ -362,12 +434,14 @@
   padding: 6px 15px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  transition: all 0.2s;
 }
 
 .choice-btn.active {
   background: rgba(255, 255, 255, 0.15);
   color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Custom Toggle Switch */
@@ -721,20 +795,66 @@ input:checked+.slider:before {
 }
 
 /* Autocomplete Suggestion */
+/* Autocomplete Suggestion */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .suggestion-popup {
   position: fixed;
-  background: #202020;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: rgba(30, 30, 30, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   z-index: 15000;
-  pointer-events: none;
-  /* Let clicks pass through */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
-  gap: 8px;
-  transform: translateY(5px);
+  flex-direction: column;
+  min-width: 200px;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  color: #fff;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.1s;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item.active,
+.suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.suggestion-match {
+  color: #4da6ff;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.suggestion-preview {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
 }
 
 .suggestion-match {

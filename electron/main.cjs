@@ -12,6 +12,56 @@ function log(message) {
     }
 }
 
+const { spawn } = require('child_process');
+
+let pythonProcess = null;
+
+function startPythonBridge() {
+    log("Starting Python Bridge...");
+    const isDev = !app.isPackaged;
+
+    // In Dev: telegram_bridge.py is in the root (cwd)
+    // In Prod: It should be in resources or bundled.
+    // Simplifying: we assume it's next to the app or we resolve it.
+
+    // For this context: We assume the user has sources.
+    // Adjust path based on your setup.
+    let scriptPath = path.join(__dirname, '../telegram_bridge.py');
+
+    if (!isDev) {
+        // In production, resources directory is typical
+        scriptPath = path.join(process.resourcesPath, 'telegram_bridge.py');
+    }
+
+    log(`Target Script: ${scriptPath}`);
+
+    if (fs.existsSync(scriptPath)) {
+        pythonProcess = spawn('python', [scriptPath]);
+
+        pythonProcess.stdout.on('data', (data) => {
+            log(`[Bridge]: ${data}`);
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            log(`[Bridge Err]: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            log(`Bridge exited with code ${code}`);
+        });
+    } else {
+        log("telegram_bridge.py not found!");
+    }
+}
+
+function stopPythonBridge() {
+    if (pythonProcess) {
+        log("Stopping Python Bridge...");
+        pythonProcess.kill();
+        pythonProcess = null;
+    }
+}
+
 log("App Starting...")
 
 let tray = null
@@ -30,7 +80,6 @@ function createWindow() {
             resizable: true,
             minWidth: 200,
             minHeight: 200,
-            backgroundMaterial: 'none',
             webPreferences: {
                 preload: path.join(__dirname, 'preload.cjs'),
                 nodeIntegration: false,
@@ -63,6 +112,9 @@ function createWindow() {
                         label: 'Quit', click: () => {
                             log("Tray Quit clicked")
                             isQuitting = true
+                            log("Tray Quit clicked")
+                            isQuitting = true
+                            stopPythonBridge()
                             app.quit()
                         }
                     }
@@ -130,16 +182,64 @@ ipcMain.handle('window-unmaximize', () => {
     }
 })
 
+ipcMain.handle('window-minimize', () => {
+    if (mainWindow) {
+        mainWindow.minimize()
+    }
+})
+
+let settingsWindow = null
+
+ipcMain.handle('open-settings', () => {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+        settingsWindow.focus()
+        return
+    }
+
+    settingsWindow = new BrowserWindow({
+        width: 600,
+        height: 500,
+        frame: false,
+        transparent: true,
+        resizable: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.cjs'),
+            nodeIntegration: false,
+            contextIsolation: true
+        },
+        icon: path.join(__dirname, process.env.VITE_DEV_SERVER_URL ? '../public/notepad_17560496.ico' : '../dist/notepad_17560496.ico')
+    })
+
+    const isDev = !app.isPackaged
+    const startUrl = isDev
+        ? (process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173')
+        : `file://${path.join(__dirname, '../dist/index.html')}`
+
+    settingsWindow.loadURL(`${startUrl}#settings`)
+
+    // Optional: add some "glass" material if desired, or rely on CSS
+    // settingsWindow.setBackgroundMaterial('acrylic') 
+})
+
+ipcMain.handle('app-close', () => {
+    // If we have a settings win, close it too? Or just the sender?
+    const senderWin = BrowserWindow.getFocusedWindow()
+    if (senderWin === settingsWindow) {
+        settingsWindow.close()
+    } else {
+        // Main Window close logic (minimize to tray)
+        if (mainWindow) mainWindow.close()
+    }
+})
+
 ipcMain.handle('window-is-maximized', () => {
     return mainWindow ? mainWindow.isMaximized() : false
 })
 
-ipcMain.handle('app-close', () => {
-    if (mainWindow) mainWindow.close()
-})
 
 app.whenReady().then(() => {
     log("App Ready")
+    startPythonBridge();
     createWindow()
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
