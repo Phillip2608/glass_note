@@ -43,11 +43,7 @@
   font-family: inherit;
 }
 
-/* Iterate: User asked for "identifier", maybe they want to copy it? let's allow copy but not edit. user-select: text */
-user-select: text;
-cursor: default;
-font-family: inherit;
-}
+
 
 /* Custom Resize Handles */
 .resize-handle {
@@ -274,16 +270,7 @@ font-family: inherit;
 
 /* Settings Modal - Sidebar Layout */
 /* Settings Panel - Integrated Layout */
-.settings-panel {
-  flex: 1;
-  /* Fills remaining space */
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(20px);
-  animation: fadeIn 0.1s ease-out;
-}
+
 
 @keyframes fadeIn {
   from {
@@ -296,17 +283,7 @@ font-family: inherit;
 }
 
 /* Sidebar - Drag Handle for App Window */
-.settings-sidebar {
-  width: 250px;
-  background: rgba(255, 255, 255, 0.03);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  -webkit-app-region: drag;
-  /* Allows moving the window */
-  user-select: none;
-}
+
 
 .settings-sidebar:active {
   cursor: default;
@@ -372,14 +349,7 @@ font-family: inherit;
 }
 
 /* Content Area */
-.settings-content {
-  flex: 1;
-  padding: 30px 40px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
+
 
 /* Optional top-right close */
 .content-header-controls {
@@ -518,6 +488,9 @@ input:checked+.slider:before {
   background: white;
   cursor: pointer;
 }
+
+/* Settings Panel */
+
 
 .styled-select {
   background: rgba(0, 0, 0, 0.3);
@@ -675,19 +648,202 @@ input:checked+.slider:before {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Modal */
+/* Settings Panel & Modal */
+/* Settings Panel & Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 20000;
+  background: transparent;
+  /* No dark overlay */
+  backdrop-filter: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-app-region: no-drag;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.settings-panel {
+  display: flex;
+  /* width: 1200px !important; REMOVED for responsiveness */
+  /* height: 800px !important; REMOVED */
+  width: 90vw;
+  height: 90vh;
+  min-width: 600px;
+  min-height: 400px;
+  max-width: 95vw;
+  max-height: 95vh;
+
+  /* Matches main app window style */
+  background: rgba(0, 0, 0, 0.4);
+  /* Slightly darker for legibility, still transparent */
+  backdrop-filter: blur(20px);
+
+  border-radius: 12px;
+
+  /* CRITICAL: overflow: auto is required for resize handle to be visible/work */
+  overflow: auto;
+  resize: both;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  animation: fadeIn 0.2s ease-out;
+
+  /* Ensure handle is visible */
+  position: relative;
+}
+
+/* Removed resize property as window resize handles it now */
+
+.settings-sidebar {
+  width: 250px;
+  /* Slightly wider */
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  /* Prevent sidebar from shrinking */
+  -webkit-app-region: drag;
+  /* ENABLE DRAG */
+  user-select: none;
+}
+
+/* ... headers ... */
+
+.sidebar-btn {
+  /* ... existing basic styles ... */
+  background: transparent;
+  border: none;
+  color: #aaa;
+  padding: 12px 20px;
+  /* Larger click area */
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 15px;
+  /* Larger font */
+  margin-bottom: 2px;
+}
+
+/* ... styles ... */
+
+.settings-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  min-width: 0;
+  /* Flexbox overflow fix */
+}
+
+/* Better Input Styling */
+.styled-select,
+.styled-input,
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 10px 12px;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.styled-select:focus,
+input[type="text"]:focus {
+  border-color: rgba(100, 181, 246, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.sidebar-nav {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sidebar-btn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  padding: 10px 15px;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.sidebar-btn.active {
+  background: rgba(60, 60, 60, 0.6);
+  color: #fff;
+  font-weight: 500;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.sidebar-close-btn {
+  margin: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.settings-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.setting-section {
+  margin-bottom: 30px;
+}
+
+.setting-section h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #eee;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
 }
 
 .shortcut-modal {
@@ -867,4 +1023,465 @@ input:checked+.slider:before {
   color: rgba(255, 255, 255, 0.4);
   font-size: 10px;
   text-transform: uppercase;
+}
+
+/* Table Button Styles */
+.actions-cell {
+  width: 20%;
+  white-space: nowrap;
+  display: flex;
+  gap: 8px;
+}
+
+.table-edit-btn,
+.table-delete-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.table-edit-btn:hover {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border-color: #4caf50;
+}
+
+.table-delete-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border-color: #f44336;
+}
+
+/* ==================================================== */
+/* INTEGRATED SETTINGS VIEW FIX (Required for Full Visibility) */
+/* ==================================================== */
+.integrated-settings-view {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  overflow: hidden !important;
+
+  /* Glass Background matching Main Window */
+  background: rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Force children to fill height */
+.integrated-settings-view .settings-sidebar {
+  height: 100% !important;
+  width: 180px !important;
+  /* Reduced width for 500px window */
+  background: rgba(0, 0, 0, 0.3);
+  /* Slightly darker sidebar */
+}
+
+.integrated-settings-view .settings-content {
+  flex: 1 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  padding: 30px !important;
+  min-width: 0;
+}
+
+/* ==================================================== */
+/* PDF MANAGER STYLES */
+/* ==================================================== */
+/* ==================================================== */
+/* PDF MANAGER STYLES (CENTER MODAL FINAL) */
+/* ==================================================== */
+.pdf-manager-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+}
+
+/* Floating Action Button */
+.pdf-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #00C6FF);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
+  border: none;
+  transition: transform 0.2s;
+  z-index: 2005;
+}
+
+.pdf-fab:hover {
+  transform: scale(1.1);
+}
+
+.fab-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #FF3B30;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(30, 30, 30, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Center Modal Overlay */
+.pdf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  /* Deeper blur for focus */
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Window */
+.pdf-center-modal {
+  width: 90vw;
+  height: 85vh;
+  max-width: 1400px;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pdf-header {
+  height: 80px;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.02), transparent);
+}
+
+.pdf-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.add-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.close-btn-icon {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Grid Layout */
+.pdf-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+  display: grid;
+  /* Larger cards: 240px min width */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 30px;
+  align-content: flex-start;
+}
+
+.grid-empty-state {
+  grid-column: 1 / -1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 3px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.01);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grid-empty-state:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Card Style */
+.pdf-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 320px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: grab;
+}
+
+.pdf-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.pdf-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.pdf-card:active {
+  cursor: grabbing;
+}
+
+.card-preview {
+  flex: 1;
+  background: #f0f0f2;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Improved Iframe handling */
+.preview-frame-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-preview iframe {
+  width: 140%;
+  /* Render larger to look HiDPI when scaled down */
+  height: 140%;
+  border: none;
+  pointer-events: none;
+  /* Crucial for DnD */
+  transform: scale(0.72);
+  transform-origin: center;
+}
+
+/* Blocker to catch clicks but allow DnD */
+.iframe-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Hover Overlay */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  backdrop-filter: blur(4px);
+  z-index: 20;
+}
+
+.pdf-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.overlay-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+}
+
+.overlay-btn:hover {
+  transform: scale(1.1);
+  color: #007AFF;
+}
+
+.overlay-btn.delete {
+  color: #FF3B30;
+}
+
+.overlay-btn.delete:hover {
+  background: #FF3B30;
+  color: #fff;
+}
+
+.card-footer {
+  height: 55px;
+  padding: 0 20px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.truncate-text {
+  font-size: 13px;
+  color: #1c1c1e;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.card-reorder {
+  color: #ccc;
+  cursor: grab;
+}
+
+/* Footer */
+.pdf-footer-bar {
+  height: 90px;
+  padding: 0 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-hint {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.file-count {
+  font-size: 16px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.merge-btn-primary {
+  background: #34C759;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 14px;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(52, 199, 89, 0.3);
+  transition: transform 0.2s;
+}
+
+.merge-btn-primary:hover {
+  background: #30b651;
+  transform: translateY(-2px);
+}
+
+.merge-btn-primary:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }

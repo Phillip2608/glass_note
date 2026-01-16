@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+// Force Update Trigger
 import './App.css';
 import { Scissors, Copy, Clipboard, RotateCcw, RotateCw, Send, Plus } from 'lucide-react';
 import { TitleBar } from './components/TitleBar';
@@ -12,6 +13,7 @@ import { useResize } from './hooks/useResize';
 import { useSnippets } from './hooks/useSnippets';
 import { useHelpers } from './hooks/useHelpers';
 import { useToast } from './context/ToastContext';
+import { PdfManager } from './components/PdfManager';
 
 function App() {
   const { settings, updateSetting, showSettings, setShowSettings } = useSettings();
@@ -107,87 +109,63 @@ function App() {
       alert("Shortcut identifier must start with a letter and contain no spaces/special characters.");
       return;
     }
-    const success = addSnippet(newShortcutTrigger, shortcutContent);
+    const success = addSnippet(newShortcutTrigger, shortcutContent, false);
     if (!success) {
       if (!confirm(`Shortcut '/${newShortcutTrigger}' already exists. Overwrite?`)) return;
-      removeSnippet(newShortcutTrigger);
-      addSnippet(newShortcutTrigger, shortcutContent);
+      // Overwrite mode
+      addSnippet(newShortcutTrigger, shortcutContent, true);
     }
     setShowShortcutModal(false);
   };
 
   // --- Automation Logic ---
 
-  // Validate format:
-  // Email
-  // (Empty Line)
-  // XXX-XXXX-XXX (or similar generic code)
-  // 11111111111 (11 digits)
-  // FFFFF (5 chars)
-  const validateAutomationFormat = (text: string): boolean => {
-    const lines = text.trim().split('\n').map(l => l.trim());
 
-    // We expect some data. 
-    // Format:
-    // Email(s)
-    // (Empty Line - Optional/Flexible)
-    // Code
-    // 11 Digits
-    // Code
-
-    const dataLines = lines.filter(l => l.length > 0);
-
-    if (dataLines.length < 4) return false;
-
-    // First chunk(s) are emails.
-    // The LAST 3 lines are definitely Code, Digits, Code.
-    // Everything before that is emails.
-
-    const code2 = dataLines[dataLines.length - 1];
-    const digits = dataLines[dataLines.length - 2];
-    const code1 = dataLines[dataLines.length - 3];
-
-    // Check Emails
-    // All lines before index (length - 3)
-    const emailLines = dataLines.slice(0, dataLines.length - 3);
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // User might put multiple emails on one line separated by ; or just multiple lines.
-    // Let's flatten and split by delimiter if present
-    const allEmails = emailLines.join(';').split(/[;\s]+/).filter(e => e.length > 0);
-
-    if (allEmails.length === 0) return false;
-    for (const email of allEmails) {
-      if (!emailRegex.test(email)) return false;
-    }
-
-    const digitsRegex = /^\d{11}$/;
-
-    if (code1.length < 3) return false; // Lenient check
-    if (!digitsRegex.test(digits)) return false;
-    if (code2.length < 1) return false;
-
-    return true;
-  };
 
   const { showToast } = useToast();
 
-  const handleEmissao = async () => {
+  const handleEmissao = async (isVerification = false, targetChatId?: string) => {
     // Check for Bridge Settings
     if (!contextMenu || !settings.telegramApiId || !settings.telegramApiHash || !settings.telegramPhoneNumber) {
       showToast("Please ensure API ID, Hash, and Phone are set in Settings > Telegram.", 'error');
       return;
     }
 
-    const text = contextMenu.selectedText.trim();
-    if (!validateAutomationFormat(text)) {
-      showToast("Invalid format. Please ensure the text matches the required pattern:\n\nEmail\n\nCode\n11 Digits\nCode", 'error');
+    let text = contextMenu.selectedText.trim();
+
+    // Validation Removed per User Request.
+    // Only check if text is empty.
+    if (!text) {
+      showToast("Please select some text to send.", 'error');
       return;
+    }
+
+    // Logic for Verification
+    if (isVerification) {
+      text = `${text}\n\nVERIFICACAO`;
     }
 
     setContextMenu(null); // Close menu immediately
 
     const bridgeUrl = settings.telegramBridgeUrl || 'http://localhost:5000';
+
+    // Determine Chat ID Override
+    // If targetChatId is provided (from contacts), use it.
+    // If isVerification, use settings.verificationChatId OR Hardcoded Fallback
+
+    // USER REQUEST: Verification Chat ID "directly in code"
+    // Replace the string below with your specific group ID if you prefer hardcoding.
+    const HARDCODED_VERIFICATION_ID = "-4526089140";
+
+    let chatIdToUse = targetChatId;
+    if (isVerification) {
+      chatIdToUse = HARDCODED_VERIFICATION_ID || settings.verificationChatId;
+
+      if (!chatIdToUse) {
+        showToast("Verification Chat ID not found. Please set it in Settings > Telegram or hardcode it in App.tsx.", 'error');
+        return;
+      }
+    }
 
     try {
       const response = await fetch(`${bridgeUrl}/send`, {
@@ -197,13 +175,14 @@ function App() {
           api_id: settings.telegramApiId,
           api_hash: settings.telegramApiHash,
           phone: settings.telegramPhoneNumber,
-          text: `AUTOMATION_TRIGGER:\n${text}`
+          text: text, // Removed AUTOMATION_TRIGGER prefix
+          chat_id: chatIdToUse // Sending chat_id if available
         })
       });
 
       const data = await response.json();
       if (data.success) {
-        showToast('Mensagem enviada para emissão!', 'success');
+        showToast('Mensagem enviada!', 'success');
       } else {
         showToast('Bridge Error: ' + (data.error || 'Unknown error'), 'error');
       }
@@ -237,6 +216,15 @@ function App() {
           updateSetting={updateSetting}
           snippets={snippets}
           deleteSnippet={removeSnippet}
+          onEditSnippet={(trigger, content) => {
+            // In detached mode, we can't easily open the modal in the main window without IPC.
+            // For now, we might need a simple prompt or alert, OR just rely on the main window.
+            // Given the architecture, let's just use window.opener if available or a simple prompt fallback?
+            // Actually, Settings Window is same React App. We can just use the modal state locally!
+            setNewShortcutTrigger(trigger);
+            setShortcutContent(content);
+            setShowShortcutModal(true);
+          }}
           onClose={handleClose}
         />
       </div>
@@ -286,6 +274,11 @@ function App() {
           updateSetting={updateSetting}
           snippets={snippets}
           deleteSnippet={removeSnippet}
+          onEditSnippet={(trigger, content) => {
+            setNewShortcutTrigger(trigger);
+            setShortcutContent(content);
+            setShowShortcutModal(true);
+          }}
           onClose={() => setShowSettings(false)}
         />
       ) : (
@@ -302,7 +295,11 @@ function App() {
       {/* Context Menu */}
       {contextMenu && contextMenu.visible && (
         <div className="custom-context-menu"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
+          style={{
+            top: contextMenu.y > window.innerHeight - 300 ? 'auto' : contextMenu.y,
+            bottom: contextMenu.y > window.innerHeight - 300 ? window.innerHeight - contextMenu.y : 'auto',
+            left: contextMenu.x
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Edit Actions */}
@@ -328,9 +325,29 @@ function App() {
           {/* Special Actions */}
           {contextMenu.selectedText && (
             <>
-              <div className="context-menu-item" onClick={handleEmissao}>
+              <div className="context-menu-item" onClick={() => handleEmissao(false)}>
                 <Send size={14} style={{ marginRight: 8 }} /> Emissão
               </div>
+
+              {/* Verification Option - Always Visible */}
+              <div className="context-menu-item" onClick={() => handleEmissao(true)}>
+                <Send size={14} style={{ marginRight: 8, color: '#fdd835' }} /> Verificar
+              </div>
+
+              {/* Contacts Submenu (Quick & Dirty visualization: just list them if not too many, or separate section) */}
+              {(settings.contacts && settings.contacts.length > 0) && (
+                <>
+                  <div style={{ padding: '4px 8px', fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Enviar para -&gt;</div>
+                  {settings.contacts.map(contact => (
+                    <div key={contact.id} className="context-menu-item" onClick={() => handleEmissao(false, contact.chatId)}>
+                      <Send size={14} style={{ marginRight: 8 }} /> {contact.name}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '4px 0' }}></div>
+
               <div className="context-menu-item" onClick={handleCreateSnippetClick}>
                 <Plus size={14} style={{ marginRight: 8 }} /> Create Shortcut
               </div>
@@ -379,6 +396,9 @@ function App() {
           <div className="resize-handle corner" onMouseDown={(e) => handleResizeStart(e, 'bottom-right')} />
         </>
       )}
+
+      {/* PDF Manager (Only visible in Editor mode) */}
+      {!showSettings && <PdfManager />}
     </div>
   );
 }

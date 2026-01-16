@@ -15,6 +15,9 @@
       "electron/**/*",
       "package.json"
     ],
+    "extraResources": [
+      "telegram_bridge.py"
+    ],
     "win": {
       "target": "nsis",
       "icon": "public/notepad_17560496.ico",
@@ -25,7 +28,10 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "installerIcon": "public/notepad_17560496.ico",
+      "uninstallerIcon": "public/notepad_17560496.ico",
+      "shortcutName": "Glass Note"
     }
   },
   "scripts": {
@@ -41,6 +47,7 @@
     "g": "^2.0.1",
     "lucide-react": "^0.562.0",
     "npm": "^11.7.0",
+    "pdf-lib": "^1.17.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

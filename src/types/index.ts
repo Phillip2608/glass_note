@@ -25,4 +25,12 @@ export interface Settings {
     telegramPhoneNumber: string;
     telegramBridgeUrl: string;
     accountingData: string;
+    verificationChatId: string;
+    contacts: Contact[];
+}
+
+export interface Contact {
+    id: string;
+    name: string;
+    chatId: string;
 }

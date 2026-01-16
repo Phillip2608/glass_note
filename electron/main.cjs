@@ -62,6 +62,11 @@ function stopPythonBridge() {
     }
 }
 
+// Set App User Model ID for Windows Taskbar Grouping
+if (process.platform === 'win32') {
+    app.setAppUserModelId('com.glassnote.app')
+}
+
 log("App Starting...")
 
 let tray = null
@@ -72,8 +77,8 @@ function createWindow() {
     log("createWindow called")
     try {
         mainWindow = new BrowserWindow({
-            width: 400,
-            height: 600,
+            width: 500,
+            height: 700,
             frame: false,
             transparent: true,
             hasShadow: true,
@@ -197,8 +202,8 @@ ipcMain.handle('open-settings', () => {
     }
 
     settingsWindow = new BrowserWindow({
-        width: 600,
-        height: 500,
+        width: 700,
+        height: 600,
         frame: false,
         transparent: true,
         resizable: true,

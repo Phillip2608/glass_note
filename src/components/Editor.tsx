@@ -247,6 +247,13 @@ export const Editor = ({ activeNote, settings, snippets, onContentChange, onSave
                 }}
                 onKeyUp={handleKeyUp}
                 onContextMenu={onContextMenu}
+                onCopy={(e: React.ClipboardEvent) => {
+                    e.preventDefault();
+                    const selection = window.getSelection();
+                    if (selection) {
+                        e.clipboardData.setData('text/plain', selection.toString());
+                    }
+                }}
                 onPaste={(e: React.ClipboardEvent) => {
                     e.preventDefault();
                     // Normalize line endings to simple \n and ensure no double encoding issues

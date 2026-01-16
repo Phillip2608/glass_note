@@ -22,7 +22,9 @@ export const useSettings = () => {
             telegramApiHash: '',
             telegramPhoneNumber: '',
             telegramBridgeUrl: 'http://localhost:5000',
-            accountingData: ''
+            accountingData: '',
+            verificationChatId: '',
+            contacts: []
         };
         return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
     });

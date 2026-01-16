@@ -11,7 +11,7 @@ if sys.platform == 'win32':
     sys.stderr.reconfigure(encoding='utf-8')
 
 # --- CONFIGURATION ---
-TARGET_CHAT_ID = -5285453194
+TARGET_CHAT_ID = -4598237048
 
 app = Quart(__name__)
 app = cors(app, allow_origin="*")
@@ -115,23 +115,37 @@ async def send_message():
         if not await client.is_user_authorized():
             return jsonify({"success": False, "error": "Not Authorized. Please Login first."}), 401
         
+        # Determine Target
+        target_id_raw = data.get('chat_id')
+        final_target = None
+
+        if target_id_raw:
+            try:
+                # Try converting to int (User ID)
+                final_target = int(target_id_raw)
+            except:
+                # Keep as string (Username or invalid)
+                final_target = target_id_raw
+        else:
+            final_target = TARGET_CHAT_ID
+
         # Resolve Entity (Fix for "Invalid Peer")
         try:
             # Try to get entity from cache or network
-            entity = await client.get_entity(TARGET_CHAT_ID)
+            entity = await client.get_entity(final_target)
         except Exception:
             # If failed (e.g. not in cache), sync dialogs to populate cache
-            print("⚠️ Entity not found. Syncing dialogs...")
+            print(f"⚠️ Entity {final_target} not found. Syncing dialogs...")
             await client.get_dialogs()
             try:
-                entity = await client.get_entity(TARGET_CHAT_ID)
+                entity = await client.get_entity(final_target)
             except Exception as e:
                 # If still fails, maybe the ID is wrong or user is not in group
                 print(f"❌ Could not resolve chat: {e}")
-                return jsonify({"success": False, "error": f"Could not find Chat {TARGET_CHAT_ID}. Make sure you are a member."}), 400
+                return jsonify({"success": False, "error": f"Could not find Chat {final_target}. Make sure you are a member or have a cha with them."}), 400
 
         await client.send_message(entity, text)
-        print(f"✅ Message sent to {TARGET_CHAT_ID} via {phone}")
+        print(f"✅ Message sent to {final_target} via {phone}")
         
         return jsonify({"success": True})
 

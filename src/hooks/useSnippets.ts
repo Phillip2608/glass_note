@@ -78,11 +78,16 @@ export const useSnippets = () => {
         return [...savedSnippets, ...generatedSnippets];
     }, [savedSnippets, generatedSnippets]);
 
-    const addSnippet = (trigger: string, content: string) => {
-        // Prevent overwriting generated ones? Or allow manual override?
-        // For now, check both.
-        if (snippets.some(s => s.trigger === trigger)) return false;
-        setSavedSnippets([...savedSnippets, { trigger, content }]);
+    const addSnippet = (trigger: string, content: string, overwrite = false) => {
+        if (!overwrite && snippets.some(s => s.trigger === trigger)) return false;
+
+        // If overwrite, remove old one first if it exists (manual ones)
+        if (overwrite) {
+            const others = savedSnippets.filter(s => s.trigger !== trigger);
+            setSavedSnippets([...others, { trigger, content }]);
+        } else {
+            setSavedSnippets([...savedSnippets, { trigger, content }]);
+        }
         return true;
     };
 
